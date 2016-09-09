@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/beginText"
+        android:text="НАЧАЛО"
+        android:layout_gravity="center"/>
+    <TextView
+        android:id="@+id/upTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="7:00" />
+    <View
+        android:id="@+id/dividerLine"
+        android:layout_width="match_parent"
+        android:layout_height="3px"
+        android:background="#c6c6c6">
+    </View>
+    <TextView
+        android:id="@+id/downTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="8:00" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/endText"
+        android:text="ОКОНЧАНИЕ"
+        android:layout_gravity="center"/>
+</LinearLayout>
