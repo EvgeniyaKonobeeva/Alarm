@@ -3,6 +3,8 @@ package com.example.ekonobeeva.alarm;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -11,7 +13,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextFieldsView textFieldsView = (TextFieldsView)findViewById(R.id.textViewFields);
+        final TextFieldsView textFieldsView = (TextFieldsView)findViewById(R.id.textViewFields);
+        SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
+        final DottedCircle dottedCircle = (DottedCircle)findViewById(R.id.dottedCircle);
+
 
         textFieldsView.getUPTextView().setTypeface(Typeface.MONOSPACE, 0);
         textFieldsView.getUPTextView().setTextSize(50);
@@ -19,6 +24,29 @@ public class MainActivity extends AppCompatActivity {
         textFieldsView.getDownTextView().setTextSize(50);
         textFieldsView.getBeginTextView().setTypeface(Typeface.MONOSPACE, 0);
         textFieldsView.getEndingTextView().setTypeface(Typeface.SANS_SERIF, 0);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                int degree = progress;
+                dottedCircle.setRotateAng(degree);
+                dottedCircle.invalidate();
+
+                Log.d("mainActivity", "progress : " + progress);
+                Log.d("mainActivity", "angle : " + degree);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
     }
 }
