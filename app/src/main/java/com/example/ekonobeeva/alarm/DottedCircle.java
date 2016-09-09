@@ -37,9 +37,10 @@ public class DottedCircle extends View {
     private int spaceBigPoints;
     private int viewCenterX;
     private int viewCenterY;
-    private int rotate;
+    private int rotate ;
 
     private Matrix matrix;
+
 
 
 
@@ -73,17 +74,14 @@ public class DottedCircle extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         setMeasurement();
+            matrix.reset();
+            matrix.postRotate(rotate, viewCenterX, viewCenterY);
+            runningArcPath.transform(matrix);
 
-        canvas.save();
-        matrix.reset();
-        matrix.postRotate(rotate, viewCenterX, viewCenterY);
-        runningArcPath.transform(matrix);
-
-
-        canvas.drawPath(runningArcPath, arcPaint);
+            canvas.drawPath(runningArcPath, arcPaint);
 
         canvas.drawPath(mainCirclePath, mPaint);
-        canvas.restore();
+        //canvas.restore();
 
     }
 
@@ -102,7 +100,7 @@ public class DottedCircle extends View {
 
         mainCirclePath = new Path();
 
-        runningArcPath = new Path();
+
 
         arcPaint = new Paint();
         arcPaint.setStyle(Paint.Style.STROKE);
@@ -112,6 +110,7 @@ public class DottedCircle extends View {
         arcPaint.setAlpha(100);
 
         matrix = new Matrix();
+
 
     }
 
@@ -135,8 +134,10 @@ public class DottedCircle extends View {
        // mainCirclePath.addCircle(viewCenterX,viewCenterY, radius, Path.Direction.CCW);
         RectF mainClockCircle = new RectF(viewCenterX-radius, viewCenterY-radius, viewCenterX+radius, viewCenterY+radius);
         mainCirclePath.addArc(mainClockCircle,0, 357);
-
-        runningArcPath.addRect(mainClockCircle, Path.Direction.CCW);
+        if(runningArcPath == null) {
+            runningArcPath = new Path();
+            runningArcPath.addArc(mainClockCircle, 0, 20);
+        }
 
 
         PathDashPathEffect smallPointsEffect = new PathDashPathEffect(this.smallPointsPath, spaceSmallPoints, 0, PathDashPathEffect.Style.ROTATE );
@@ -154,8 +155,9 @@ public class DottedCircle extends View {
 
     }
 
-    public void setRotateAng(float rotateAng){
-        rotate = (int)rotateAng;
+    public void setRotateAng(int rotateAng){
+        rotate = rotateAng;
+            invalidate();
     }
 
 

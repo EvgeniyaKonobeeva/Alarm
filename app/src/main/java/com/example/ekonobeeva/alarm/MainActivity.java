@@ -8,6 +8,7 @@ import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
 
+    int pastProgress = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,9 +29,14 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                int degree = progress;
+                int degree = 0;
+                if(pastProgress > progress){
+                    degree = -progress;
+                }else{
+                    degree = progress;
+                }
+                pastProgress = progress;
                 dottedCircle.setRotateAng(degree);
-                dottedCircle.invalidate();
 
                 Log.d("mainActivity", "progress : " + progress);
                 Log.d("mainActivity", "angle : " + degree);
