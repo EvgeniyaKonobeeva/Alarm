@@ -29,8 +29,8 @@ public class DottedCircle extends View {
 
     private final static int INVALID_POINTER_ID = -1;
     private final static int RIGHT_LEFT_PADDING = 10;
-    private final static int DELTA_Y = 50;
-    private final static int DELTA_X = 50;
+    private final static int DELTA_Y = 60;
+    private final static int DELTA_X = 60;
 
     private final static String TAG = "DottedCircle";
 
@@ -59,11 +59,13 @@ public class DottedCircle extends View {
     private int viewCenterX;
     private int viewCenterY;
     private float rotate ;
-    private int startAngle;
+    private static float sweepAngle = 30;
+    private static float startAngle = 90;
 
     private Matrix matrix;
+    private RectF rectfClockCircle;
 
-/*dottedCircle's constructors*/
+    /*dottedCircle's constructors*/
     public DottedCircle(Context context){
         super(context);
         init();
@@ -85,7 +87,40 @@ public class DottedCircle extends View {
         init();
     }
 
+    public void setMeasurement(){
+        viewCenterX = getMeasuredWidth()/2;
+        viewCenterY = getMeasuredHeight()/2;
 
+        radius = (viewCenterX > viewCenterY ? viewCenterY : viewCenterX)-RIGHT_LEFT_PADDING;
+
+        int clockCircleLength = (int)Math.ceil(2*radius*Math.PI);
+
+        spaceSmallPoints = clockCircleLength/60;
+        spaceBigPoints = spaceSmallPoints*5;
+
+        radius = (int )((spaceSmallPoints*60)/(2*Math.PI));
+
+    }
+
+    public void setClockCirclePath(){
+        rectfClockCircle = new RectF(viewCenterX-radius, viewCenterY-radius, viewCenterX+radius, viewCenterY+radius);
+        clockCirclePath.addArc(rectfClockCircle,0, 357);
+        runningArcPath = new Path();
+        runningArcPath.addArc(rectfClockCircle, startAngle, sweepAngle);
+        PathDashPathEffect smallPointsEffect = new PathDashPathEffect(this.smallPointsPath, spaceSmallPoints, 0, PathDashPathEffect.Style.ROTATE );
+        PathDashPathEffect bigPointsEffect = new PathDashPathEffect(this.bigPointsPath, spaceBigPoints, 0, PathDashPathEffect.Style.ROTATE );
+        PathEffect sumBigSmallEffect = new SumPathEffect(smallPointsEffect, bigPointsEffect);
+
+        clockCirclePaint.setPathEffect(sumBigSmallEffect);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        setMeasurement();
+        setClockCirclePath();
+        computeArcBounds();
+    }
 
 
     @Override
@@ -182,35 +217,17 @@ public class DottedCircle extends View {
     }
 
 
-    public void setMeasurement(){
-        viewCenterX = getMeasuredWidth()/2;
-        viewCenterY = getMeasuredHeight()/2;
 
-        radius = (viewCenterX > viewCenterY ? viewCenterY : viewCenterX)-RIGHT_LEFT_PADDING;
 
-        int clockCircleLength = (int)Math.ceil(2*radius*Math.PI);
 
-        spaceSmallPoints = clockCircleLength/60;
-        spaceBigPoints = spaceSmallPoints*5;
 
-        radius = (int )((spaceSmallPoints*60)/(2*Math.PI));
-
+    protected void setNewArcSweepAngle(float sweepAngle){
+        runningArcPath.addArc(rectfClockCircle, startAngle, sweepAngle);
     }
 
-    public void setClockCirclePath(){
-        RectF rectfClockCircle = new RectF(viewCenterX-radius, viewCenterY-radius, viewCenterX+radius, viewCenterY+radius);
-        clockCirclePath.addArc(rectfClockCircle,0, 357);
-        if(runningArcPath == null) {
-            runningArcPath = new Path();
-            runningArcPath.addArc(rectfClockCircle, 90, 20);
-        }
-        PathDashPathEffect smallPointsEffect = new PathDashPathEffect(this.smallPointsPath, spaceSmallPoints, 0, PathDashPathEffect.Style.ROTATE );
-        PathDashPathEffect bigPointsEffect = new PathDashPathEffect(this.bigPointsPath, spaceBigPoints, 0, PathDashPathEffect.Style.ROTATE );
-        PathEffect sumBigSmallEffect = new SumPathEffect(smallPointsEffect, bigPointsEffect);
-
-        clockCirclePaint.setPathEffect(sumBigSmallEffect);
+    public void setRotateAng(float rotateAng){
+        rotate = rotateAng;
     }
-
 
     public void computeArcBounds(){
         runningArcPath.computeBounds(rectBoundsRunningArc, true);
@@ -222,26 +239,6 @@ public class DottedCircle extends View {
 
         rectBoundsPath2 = new Path();
         rectBoundsPath2.addRect(rectBoundsRunningArc2, Path.Direction.CCW);
-    }
-
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-    }
-
-    public void setRotateAng(float rotateAng){
-        rotate = rotateAng;
-        invalidate();
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        setMeasurement();
-        setClockCirclePath();
-        computeArcBounds();
     }
 
     private int mActivePointerId = INVALID_POINTER_ID;
@@ -258,7 +255,7 @@ public class DottedCircle extends View {
                 final float x = MotionEventCompat.getX(ev, pointerIndex);
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
                 computeArcBounds();
-               if(rectBoundsRunningArc2.contains((float)x,(float)y)) {
+               if(rectBoundsRunningArc2.contains(x,y)) {
                    Log.d(TAG, "ACTION_DOWN");
                    mLastTouchX = x;
                    mLastTouchY = y;
@@ -277,29 +274,12 @@ public class DottedCircle extends View {
                 computeArcBounds();
                 final float x = MotionEventCompat.getX(ev, pointerIndex);
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-                if(rectBoundsRunningArc2.contains((float)x,(float)y)) {
+                if(rectBoundsRunningArc2.contains(x, y)) {
                     Log.d(TAG, "ACTION_MOVE");
-
-                    final float dx = x - mLastTouchX;
-                    final float dy = y - mLastTouchY;
-
-                    vector mVector = new vector(viewCenterX + radius, viewCenterY, viewCenterX, viewCenterY);
-                    vector lastTouchVector = new vector(viewCenterX, viewCenterY, mLastTouchX, mLastTouchY);
-                    vector nowTouchVector = new vector(viewCenterX, viewCenterY, x,y);
-                    double angle = computeAngle(nowTouchVector, lastTouchVector);
-                    double nowAngle = computeAngle(mVector, nowTouchVector);
-                    double lastAngle = computeAngle(mVector, lastTouchVector);
-                    //setRotateAng((float)(angle*(180/PI)));
-
-
-                    if(nowAngle - lastAngle > 0){
-                        setRotateAng((float)( -angle * (180/PI)));
-                    }else if(nowAngle - lastAngle < 0){
-                        setRotateAng((float)( angle * (180/PI)));
-                    }
-
+                    changeArcPosition(x,y);
                     mLastTouchX = x;
                     mLastTouchY = y;
+
                 }
                 break;
             }
@@ -356,6 +336,36 @@ public class DottedCircle extends View {
     protected float scalarProduct(vector a, vector b){
         return a.x * b.x + a.y * b.y;
     }
+    protected boolean clockwise(vector a, vector b){
+        float vectorProduct = (a.x*b.y - a.y*b.x);
+        return vectorProduct > 0;
+    }
 
+    protected void changeArcPosition(float x, float y){
+
+        vector lastTouchVector = new vector(viewCenterX, viewCenterY, mLastTouchX, mLastTouchY);
+        vector currTouchVector = new vector(viewCenterX, viewCenterY, x,y);
+        double angle = computeAngle(currTouchVector, lastTouchVector) * (180 / PI);
+
+        if(clockwise(lastTouchVector, currTouchVector)){
+            if(sweepAngle <= 120) {
+                setNewArcSweepAngle((sweepAngle += 1));
+            }else {
+                setRotateAng((float) (angle));
+                startAngle += angle;
+            }
+        }else {
+            if(sweepAngle >= 30){
+                setNewArcSweepAngle((sweepAngle -= 1));
+            }else {
+                setRotateAng((float) (-angle));
+                startAngle -= angle;
+            }
+
+        }
+
+        computeArcBounds();
+        invalidate();
+    }
 
 }
