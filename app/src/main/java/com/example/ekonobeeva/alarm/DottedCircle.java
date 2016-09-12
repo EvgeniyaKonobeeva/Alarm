@@ -233,6 +233,7 @@ public class DottedCircle extends View {
 
     public void setRotateAng(float rotateAng){
         rotate = rotateAng;
+        startAngle += rotateAng;
     }
 
     public void computeArcBounds(){
@@ -293,7 +294,7 @@ public class DottedCircle extends View {
                 final float x = MotionEventCompat.getX(ev, pointerIndex);
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
                 if(rectBoundsRunningArc2.contains(x, y)) {
-                    Log.d(TAG, "ACTION_MOVE");
+                    //Log.d(TAG, "ACTION_MOVE");
                     changeArcPosition(x,y);
                     mLastTouchX = x;
                     mLastTouchY = y;
@@ -333,9 +334,9 @@ public class DottedCircle extends View {
     }
 
 
-    protected double computeAngle(vector a, vector b){
+    protected float computeAngle(vector a, vector b){
         double angle = acos(scalarProduct(a, b)/(a.length * b.length));
-        return angle < 0 ? angle+360 : angle;
+        return angle < 0 ? (float)((angle+360)*(180/PI)) : (float) (angle*(180/PI));
 
     }
 
@@ -348,6 +349,7 @@ public class DottedCircle extends View {
             y = ye - yb;
             length = sqrt((double)(x * x + y * y));
         }
+
 
     }
 
@@ -363,31 +365,70 @@ public class DottedCircle extends View {
 
         vector lastTouchVector = new vector(viewCenterX, viewCenterY, mLastTouchX, mLastTouchY);
         vector currTouchVector = new vector(viewCenterX, viewCenterY, x,y);
-        double angle = computeAngle(currTouchVector, lastTouchVector)* (180/PI);
+        float angle = computeAngle(currTouchVector, lastTouchVector);
 
         if(clockwise(lastTouchVector, currTouchVector)){
-
-            if(sweepAngle <= 120) {
-                setNewArcSweepAngle((sweepAngle += 1.5));
-            }else {
-                //double angle1 = angle * (180 / PI);
-                setRotateAng((float) (angle));
-                startAngle += angle;
+            Log.d(TAG, "clockwise");
+            if(isHeadOfArc(currTouchVector)){
+                Log.d(TAG, "HeadOfArc");
+                if(!increaseArcLength(true))
+                    setRotateAng(angle);
+            }else{
+                if(!decreaseArcLength())
+                    setRotateAng(angle);
             }
+
         }else {
-            if(sweepAngle >= 30){
-                setNewArcSweepAngle((sweepAngle -= 1.5));
-            }else {
-                //double angle1 = -angle * (180 / PI);
-                setRotateAng((float) (-angle));
-                startAngle -= angle;
+            Log.d(TAG, "counter clockwise");
+            if(isHeadOfArc(currTouchVector)){
+                Log.d(TAG, "HeadOfArc");
+                if(!decreaseArcLength())
+                    setRotateAng(-angle);
+            }else{
+                if(!increaseArcLength(false))
+                    setRotateAng(-angle);
             }
-
         }
         computeArcBounds();
         invalidate();
     }
 
+    protected  vector turnedVector(vector a, double alpha){
+        double xn = -sin(alpha)*(a.y)+cos(alpha)*(a.x) + viewCenterX;
+        double yn = cos(alpha)*(a.y)+sin(alpha)*(a.x)+viewCenterY;
+        return new vector(viewCenterX, viewCenterY, (float) xn, (float)yn);
+    }
+    protected boolean isHeadOfArc(vector curVector){
+        vector beginVector = new vector(viewCenterX, viewCenterY, viewCenterX + radius, viewCenterY + radius);
+        vector startVector = turnedVector(beginVector, startAngle);
+        float arcAngle = startAngle + sweepAngle;
+        float curAngle = computeAngle(startVector, curVector);
+
+        if(curAngle < arcAngle/2){
+            return true;
+        }else {
+            return false;
+        }
+    }
+    protected boolean increaseArcLength(boolean isHead, boolean CW){
+        if(sweepAngle < 120){
+            Log.d(TAG, "increaseArcLength");
+            if(!CW && !isHead){
+                startAngle-= 1.5;
+            }
+            setNewArcSweepAngle((sweepAngle += 1.5));
+            return true;
+        }
+        return false;
+    }
+    protected boolean decreaseArcLength(boolean isHead, boolean CW){
+        if(sweepAngle > 30){
+            Log.d(TAG, "decreaseArcLength");
+            setNewArcSweepAngle((sweepAngle -= 1.5));
+            return true;
+        }
+        return false;
+    }
 
 
 }
