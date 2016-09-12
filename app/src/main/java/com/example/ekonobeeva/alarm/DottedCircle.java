@@ -29,23 +29,23 @@ public class DottedCircle extends View {
 
     private final static int INVALID_POINTER_ID = -1;
     private final static int RIGHT_LEFT_PADDING = 10;
-    private final static int DELTA_Y = 60;
-    private final static int DELTA_X = 60;
+    private final static int DELTA_Y = 70;
+    private final static int DELTA_X = 70;
 
     private final static String TAG = "DottedCircle";
 
     private GestureDetectorCompat gestureDetector;
     private Paint clockCirclePaint;
     private Paint arcPaint;
-    private Paint testPaint;
-    private Paint testPaint2;
+    private Paint bluePaint;
+    private Paint greenPaint;
+    private Paint redPaint;
+
 
     private Path clockCirclePath;
     private Path smallPointsPath;
     private Path bigPointsPath;
 
-
-    private Path rectBoundsPath;
     private Path rectBoundsPath2;
     private Path runningArcPath;
 
@@ -85,6 +85,87 @@ public class DottedCircle extends View {
     public DottedCircle(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
+    }
+
+    private void init() {
+        /*paint for bounds rect*/
+        bluePaint = new Paint();
+        bluePaint.setStyle(Paint.Style.STROKE);
+        bluePaint.setAntiAlias(true);
+        bluePaint.setColor(Color.BLUE);
+        bluePaint.setStrokeWidth(2);
+
+        greenPaint = new Paint();
+        greenPaint.setStyle(Paint.Style.STROKE);
+        greenPaint.setAntiAlias(true);
+        greenPaint.setColor(Color.GREEN);
+        greenPaint.setStrokeWidth(2);
+
+        redPaint = new Paint();
+        redPaint.setStyle(Paint.Style.STROKE);
+        redPaint.setAntiAlias(true);
+        redPaint.setColor(Color.RED);
+        redPaint.setStrokeWidth(2);
+        /*end*/
+
+
+        clockCirclePaint = new Paint();
+        clockCirclePaint.setStyle(Paint.Style.STROKE);
+        clockCirclePaint.setAntiAlias(true);
+        clockCirclePaint.setColor(Color.RED);
+        clockCirclePaint.setStrokeWidth(5);
+
+        smallPointsPath = new Path();
+        smallPointsPath.addCircle(2,2, 3, Path.Direction.CW);
+
+        bigPointsPath = new Path();
+        bigPointsPath.addCircle(2,2, 5, Path.Direction.CW);
+
+        clockCirclePath = new Path();
+
+        arcPaint = new Paint();
+        arcPaint.setStyle(Paint.Style.STROKE);
+        arcPaint.setAntiAlias(true);
+        arcPaint.setColor(Color.GRAY);
+        arcPaint.setStrokeWidth(50);
+        arcPaint.setAlpha(100);
+
+        matrix = new Matrix();
+
+        gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent motionEvent) {
+                return false;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent motionEvent) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent motionEvent) {
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent motionEvent) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+                return false;
+            }
+        });
+
+        rectBoundsRunningArc = new RectF();
+
     }
 
     public void setMeasurement(){
@@ -135,94 +216,19 @@ public class DottedCircle extends View {
 
         canvas.drawPath(clockCirclePath, clockCirclePaint);
 
-        //canvas.drawPath(rectBoundsPath, testPaint);
-
-        canvas.drawPath(rectBoundsPath2, testPaint2);
-
-    }
-
-    private void init() {
-        /*paint for bounds rect*/
-        testPaint = new Paint();
-        testPaint.setStyle(Paint.Style.STROKE);
-        testPaint.setAntiAlias(true);
-        testPaint.setColor(Color.BLUE);
-        testPaint.setStrokeWidth(2);
-
-        testPaint2 = new Paint();
-        testPaint2.setStyle(Paint.Style.STROKE);
-        testPaint2.setAntiAlias(true);
-        testPaint2.setColor(Color.GREEN);
-        testPaint2.setStrokeWidth(2);
-        /*end*/
-
-
-        clockCirclePaint = new Paint();
-        clockCirclePaint.setStyle(Paint.Style.STROKE);
-        clockCirclePaint.setAntiAlias(true);
-        clockCirclePaint.setColor(Color.RED);
-        clockCirclePaint.setStrokeWidth(5);
-
-        smallPointsPath = new Path();
-        smallPointsPath.addCircle(2,2, 3, Path.Direction.CCW);
-
-        bigPointsPath = new Path();
-        bigPointsPath.addCircle(2,2, 5, Path.Direction.CCW);
-
-        clockCirclePath = new Path();
-
-        arcPaint = new Paint();
-        arcPaint.setStyle(Paint.Style.STROKE);
-        arcPaint.setAntiAlias(true);
-        arcPaint.setColor(Color.GRAY);
-        arcPaint.setStrokeWidth(50);
-        arcPaint.setAlpha(100);
-
-        matrix = new Matrix();
-
-        gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.OnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent motionEvent) {
-                return false;
-            }
-
-            @Override
-            public void onShowPress(MotionEvent motionEvent) {
-
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent motionEvent) {
-                return false;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-                return false;
-            }
-
-            @Override
-            public void onLongPress(MotionEvent motionEvent) {
-
-            }
-
-            @Override
-            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-                return false;
-            }
-        });
-
-        rectBoundsRunningArc = new RectF();
+//        rectBoundsPath2.reset();
+//        rectBoundsPath2.addRect(firstRect, Path.Direction.CCW);
+//        canvas.drawPath(rectBoundsPath2, bluePaint);
+//        rectBoundsPath2.reset();
+//        rectBoundsPath2.addRect(secondRect, Path.Direction.CCW);
+//        canvas.drawPath(rectBoundsPath2, greenPaint);
 
     }
-
-
-
-
-
 
     protected void setNewArcSweepAngle(float sweepAngle){
+        runningArcPath.reset();
         runningArcPath.addArc(rectfClockCircle, startAngle, sweepAngle);
+
     }
 
     public void setRotateAng(float rotateAng){
@@ -233,13 +239,25 @@ public class DottedCircle extends View {
         runningArcPath.computeBounds(rectBoundsRunningArc, true);
 
         rectBoundsRunningArc2 = new RectF(rectBoundsRunningArc.left - DELTA_X, rectBoundsRunningArc.top - DELTA_Y, rectBoundsRunningArc.right + DELTA_X, rectBoundsRunningArc.bottom + DELTA_Y);
+//        float w = rectBoundsRunningArc2.width();
+//        float h = rectBoundsRunningArc2.height();
+//        float t = rectBoundsRunningArc2.top;
+//        float b = rectBoundsRunningArc2.bottom;
+//        float r = rectBoundsRunningArc2.right;
+//        float l = rectBoundsRunningArc2.left;
+//        if(h < w){
+//            firstRect = new RectF(l, t, r - w/2, b);
+//            secondRect = new RectF(l + w/2, t , r, b);
+//        }
+//        else{
+//            firstRect = new RectF(l, t, r, b - h/2);
+//            secondRect = new RectF(l, t + h/2 , r, b);
+//        }
+        rectBoundsPath2  = new Path();
+        rectBoundsPath2.addRect(rectBoundsRunningArc2, Path.Direction.CW);
 
-        rectBoundsPath  = new Path();
-        rectBoundsPath.addRect(rectBoundsRunningArc, Path.Direction.CCW);
-
-        rectBoundsPath2 = new Path();
-        rectBoundsPath2.addRect(rectBoundsRunningArc2, Path.Direction.CCW);
     }
+
 
     private int mActivePointerId = INVALID_POINTER_ID;
     private float mLastTouchX = 1;
@@ -345,27 +363,31 @@ public class DottedCircle extends View {
 
         vector lastTouchVector = new vector(viewCenterX, viewCenterY, mLastTouchX, mLastTouchY);
         vector currTouchVector = new vector(viewCenterX, viewCenterY, x,y);
-        double angle = computeAngle(currTouchVector, lastTouchVector) * (180 / PI);
+        double angle = computeAngle(currTouchVector, lastTouchVector)* (180/PI);
 
         if(clockwise(lastTouchVector, currTouchVector)){
+
             if(sweepAngle <= 120) {
-                setNewArcSweepAngle((sweepAngle += 1));
+                setNewArcSweepAngle((sweepAngle += 1.5));
             }else {
+                //double angle1 = angle * (180 / PI);
                 setRotateAng((float) (angle));
                 startAngle += angle;
             }
         }else {
             if(sweepAngle >= 30){
-                setNewArcSweepAngle((sweepAngle -= 1));
+                setNewArcSweepAngle((sweepAngle -= 1.5));
             }else {
+                //double angle1 = -angle * (180 / PI);
                 setRotateAng((float) (-angle));
                 startAngle -= angle;
             }
 
         }
-
         computeArcBounds();
         invalidate();
     }
+
+
 
 }
