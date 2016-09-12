@@ -26,33 +26,33 @@ public class MainActivity extends AppCompatActivity {
         textFieldsView.getBeginTextView().setTypeface(Typeface.MONOSPACE, 0);
         textFieldsView.getEndingTextView().setTypeface(Typeface.SANS_SERIF, 0);
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                int degree = 0;
-                if(pastProgress > progress){
-                    degree = -progress;
-                }else{
-                    degree = progress;
-                }
-                pastProgress = progress;
-                dottedCircle.setRotateAng(degree);
-
-                Log.d("mainActivity", "progress : " + progress);
-                Log.d("mainActivity", "angle : " + degree);
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
+//        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+//                int degree = 0;
+//                //if(pastProgress > progress){
+//                    degree = (progress-pastProgress)*4;
+//               //}else{
+//                   //degree = progress*4;
+//               // }
+//                pastProgress = progress;
+//                dottedCircle.setRotateAng(degree);
+//
+//                Log.d("mainActivity", "progress : " + progress);
+//                Log.d("mainActivity", "angle : " + degree);
+//
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//        });
 
     }
 }
