@@ -29,8 +29,8 @@ public class DottedCircle extends View {
 
     private final static int INVALID_POINTER_ID = -1;
     private final static int RIGHT_LEFT_PADDING = 20;
-    private final static int DELTA_Y = 70;
-    private final static int DELTA_X = 70;
+    private final static int DELTA_Y = 80;
+    private final static int DELTA_X = 80;
 
     private final static String TAG = "DottedCircle";
 
@@ -217,6 +217,8 @@ public class DottedCircle extends View {
         canvas.drawPath(runningArcPath, arcPaint);
 
         canvas.drawPath(clockCirclePath, clockCirclePaint);
+       // rectBoundsPath2.reset();
+        canvas.drawPath(rectBoundsPath2, greenPaint);
 
 //        rectBoundsPath2.reset();
 //        rectBoundsPath2.addRect(blueRect, Path.Direction.CCW);
@@ -284,9 +286,6 @@ public class DottedCircle extends View {
                    mLastTouchY = y;
                }
                 mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-//                Log.d(TAG,"scrWidth: " + getWidth() + " \nscrHeight: " + getHeight() +
-//                        " \ncenterX: " + rectBoundsRunningArc.centerX() + " \ncenterY: " + rectBoundsRunningArc.centerY() +
-//                        " \nwidth: " + rectBoundsRunningArc.width() + " \nheight: " + rectBoundsRunningArc.height());
                 break;
             }
 
@@ -298,7 +297,9 @@ public class DottedCircle extends View {
                 final float x = MotionEventCompat.getX(ev, pointerIndex);
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
                 if(rectBoundsRunningArc2.contains(x, y)) {
-
+                    Log.d(TAG,"scrWidth: " + getWidth() + " \nscrHeight: " + getHeight() +
+                            " \ncenterX: " + rectBoundsRunningArc.centerX() + " \ncenterY: " + rectBoundsRunningArc.centerY() +
+                            " \nwidth: " + rectBoundsRunningArc.width() + " \nheight: " + rectBoundsRunningArc.height());
                     //Log.d(TAG, "ACTION_MOVE");
                     changePos(x,y);
                     mLastTouchX = x;
@@ -343,6 +344,8 @@ public class DottedCircle extends View {
         vector lastTouchVector = new vector(viewCenterX, viewCenterY, mLastTouchX, mLastTouchY);
         vector currTouchVector = new vector(viewCenterX, viewCenterY, x,y);
         float angle = computeAngle(currTouchVector, lastTouchVector);
+        Log.d(TAG, "current vector " + currTouchVector.toString() );
+        Log.d(TAG, "last vector " + lastTouchVector.toString() );
         RectF tailRect = divideRect();
 
         if(tailRect.contains(x, y)){
@@ -378,8 +381,19 @@ public class DottedCircle extends View {
 
 
     protected float computeAngle(vector a, vector b){
-        double angle = acos(scalarProduct(a, b)/(a.length * b.length));
-        return angle < 0 ? (float)(angle * (180/PI) +360) : (float)(angle *(180/PI));
+        double n = scalarProduct(a, b)/(a.length * b.length);
+        if(n > 1){
+            Log.d(TAG, "angle = 0");
+            return 0f;
+        }else if(n < -1){
+            Log.d(TAG, "angle = 180");
+            return 180f;
+        }else {
+            double angle = acos(n);
+            Log.d(TAG, "angle = " + angle);
+            return angle < 0 ? (float)(angle * (180/PI) +360) : (float)(angle *(180/PI));
+        }
+
 
     }
     public static class vector{
@@ -424,7 +438,7 @@ public class DottedCircle extends View {
         return vectorProduct > 0;
     }
     protected void setNewArcSweepAngle(float sweepAngle){
-        runningArcPath.reset();
+        runningArcPath.rewind();
         runningArcPath.addArc(rectfClockCircle, startAngle, sweepAngle);
 
     }
@@ -435,70 +449,6 @@ public class DottedCircle extends View {
         //startAngle = verifyAngle(startAngle);
     }
 
-//    public static vector turnVector(vector a, double alpha){
-//        double xn = -sin(alpha)*(a.y)+cos(alpha)*(a.x);
-//        double yn = cos(alpha)*(a.y)+sin(alpha)*(a.x);
-//        return new vector((float) xn, (float)yn);
-//    }
-//    protected float verifyAngle(float angle){
-//        float returnAngle = angle;
-//        if(angle > 360){
-//            returnAngle = angle - 360;
-//        }else if(angle < 0){
-//           returnAngle = 360 - angle;
-//        }
-//        return returnAngle;
-//    }
-//    protected boolean isHeadOfArc(vector curTouchVector){
-//        /*all angles from very beginning, from 0*/
-//        vector beginVector = new vector(viewCenterX, viewCenterY, viewCenterX + radius, viewCenterY);
-//        vector startArcVector = turnVector(beginVector, startAngle);
-//        float curAngle = computeAngle(startArcVector, curTouchVector) + startAngle; // where we touch
-//        //curAngle = verifyAngle(curAngle);
-//        float endAngle = sweepAngle/2 + startAngle;
-//        //endAngle = verifyAngle(endAngle);
-//        if(curAngle < endAngle){
-//            Log.d(TAG, "tail");
-//            return false;
-//        }else if(curAngle > endAngle){
-//            Log.d(TAG, "head");
-//            return true;
-//        }else return true;
-//
-//
-//    }
-//    protected void changeP(float x, float y){
-//        vector lastTouchVector = new vector(viewCenterX, viewCenterY, mLastTouchX, mLastTouchY);
-//        vector currTouchVector = new vector(viewCenterX, viewCenterY, x,y);
-//        float angle = computeAngle(currTouchVector, lastTouchVector);
-//
-//        if(isHeadOfArc(currTouchVector)){
-//            if(clockwise(lastTouchVector, currTouchVector)){
-//                Log.d(TAG, "clockwise");
-//                if(!increaseArcLength(true, true)){
-//                    setRotateAng(angle);
-//                }
-//            }else{
-//                Log.d(TAG, "counter clockwise");
-//                if(!decreaseArcLength(true, false)){
-//                    setRotateAng(-angle);
-//                }
-//            }
-//        }else{
-//            if(clockwise(lastTouchVector,currTouchVector)){
-//                Log.d(TAG, "clockwise");
-//                setRotateAng(angle);
-//            }else {
-//                Log.d(TAG, "counter clockwise");
-//                if(!increaseArcLength(false, false)){
-//                    setRotateAng(-angle);
-//                }
-//            }
-//
-//        }
-//        computeArcBounds();
-//        invalidate();
-//    }
 
     private final static float DELTA_LENGTH = 1.3f;
 

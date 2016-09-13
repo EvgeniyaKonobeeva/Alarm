@@ -3,8 +3,6 @@ package com.example.ekonobeeva.alarm;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final TextFieldsView textFieldsView = (TextFieldsView)findViewById(R.id.textViewFields);
-        SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
         final DottedCircle dottedCircle = (DottedCircle)findViewById(R.id.dottedCircle);
 
 
